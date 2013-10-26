@@ -8,7 +8,7 @@
    var bullet = undefined;
 
    var PIXELS_AS_METER = 30;
-
+   var HEAD = 1 / 3; // размер головы относительно тела
 
    function createWorld() {
       return new Box2D.Dynamics.b2World(
@@ -109,20 +109,17 @@
       bullet = undefined;
 
       console.log("asdasdasd");
-      /*cbData.name = body.GetUserData().name;
+      cbData.name = body.GetUserData().name;
 
-      if (cbData.name == "archer1") {
-         archer1_body.userData.hp--;
-         cbData.hp = archer1_body.userData.hp;
-      }
-      if (contact.GetBodyB.userData.name == "archer2") {
-         archer2_body.userData.hp--;
-         cbData.hp = archer2_body.userData.hp;
+      if ((cbData.name == "archer1" || cbData.name == "archer2") && contact.GetBodyA().name == "bullet"){
+         archers[cbData.name].userData.hp--;
+         if (contact.GetBodyA().position.y > (contact.GetBodyB().width*(1-HEAD)))
+             archers[cbData.name].userData.hp--; // за headshot снимаем еще одну жизнь
       }
 
 
 
-      cb(cbData);*/
+      cb(cbData);
    };
 
    window.pWorld = {
