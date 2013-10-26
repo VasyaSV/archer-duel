@@ -113,8 +113,9 @@
 
       if ((cbData.name == "archer1" || cbData.name == "archer2") && contact.GetBodyA().name == "bullet"){
          archers[cbData.name].userData.hp--;
-         if (contact.GetBodyA().position.y > (contact.GetBodyB().height*(1-HEAD)))
-             archers[cbData.name].userData.hp--; // за headshot снимаем еще одну жизнь
+         if (archers[cbData.name].userData.hp != 0)
+            if (contact.GetBodyA().position.y > (contact.GetBodyB().height*(1-HEAD)))
+                 archers[cbData.name].userData.hp--; // за headshot снимаем еще одну жизнь
       }
 
 
