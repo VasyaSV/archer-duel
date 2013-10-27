@@ -108,8 +108,9 @@
        var hp = 1;
 
       if (bullet && dataA.name == "bullet"){
-         if (contact.GetBodyA().position.y > (contact.GetBodyB().height*(1-HEAD))
+         if (contact.GetBodyA().position.y > (contact.GetBodyB().height*(1-HEAD))){
              hp++;
+         }
          world.DestroyBody(bullet);
          bullet = undefined;
          cb({
