@@ -17,7 +17,7 @@
    }
 
    // property = height, width, x, y, name, hp
-   function createBody(property) {
+   function createBody(property){
       var
          body,
          body_fix_def,
@@ -147,11 +147,16 @@
          createArcher("archer1", {x : 95, y : 5});
       },
 
-       isSleep : function (name){
-           return archers[name].body.IsSleeping();
-       },
+      isSleep : function (name){
+          return !archers[name].body.IsAwake();
+      },
 
-      getHit: function (name) {
+      changeWind : function(dir){
+        var wind = new Box2D.Common.Math.b2Vec2(dir, 10);
+        world.SetGravity(wind);
+      },
+
+      getHit : function (name) {
          if (name == "archer0")
             return archer1_body.userData.hp;
          if (name == "archer1")
