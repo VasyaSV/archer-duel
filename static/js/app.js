@@ -13,6 +13,11 @@
       this.playerId    = playerId;
       this.iAmActive   = this.playerId === 0;
       this.turnTimeout = null;
+      this.elems= {
+         "archer0" : $(".archer0")[0],
+         "archer1" : $(".archer1")[0],
+         "bullet"  : $(".bullet")[0]
+      };
 
       this.init();
    };
@@ -33,8 +38,12 @@
 
       setInterval(function(){
          pWorld.step();
-         self.drawArcher("archer0", pWorld.getArcher("archer0"));
-         self.drawArcher("archer1", pWorld.getArcher("archer1"));
+         if (!pWorld.IsSleep("archer0")){
+            self.drawArcher("archer0", pWorld.getArcher("archer0"));
+         }
+         if (!pWorld.IsSleep("archer1")){
+            self.drawArcher("archer1", pWorld.getArcher("archer1"));
+         }
          if (pWorld.bulletExists()){
             self.drawBullet(pWorld.getBullet());
          }
@@ -46,18 +55,21 @@
    };
 
    Game.prototype.onState = function(data){
-      var self = this;
-      if(this.playerId == playerId){
-         //значит мы ходим
+      var winner = null;
+      if(this.playerId == data.currentPlayer){
          this.iAmActive = true;
-         this.turnTimeout = setTimeout(function(){
-            self.nextTurn()
-         }, 20000);
-      } else{
-         var players = data.players;
-         players.forEach(function(obj){
-            pWorld.setArcherPos(obj.name, obj.pos);
-         });
+         pWorld.changeWind(data.wind);
+      }
+
+      if (!data["player1"].hp){
+         winner = 1;
+      }
+      else if (!data["player2"].hp){
+         winner = 0;
+      }
+
+      if (winner){
+         socket.emit("stopGame", {winner : winner});
       }
    };
 
@@ -72,14 +84,17 @@
    };
 
    Game.prototype.drawArcher = function(name, pos){
-      $("." + name).offset(pos);
+      this.elems[name].style.top = pos.top + "px";
+      this.elems[name].style.left = pos.left + "px";
    };
 
    Game.prototype.drawBullet = function(pos){
-      $(".bullet").addClass("bulletVisible").offset(pos);
+      $(this.elems["bullet"]).addClass("bulletVisible");
+      this.elems["bullet"].style.top = pos.top + "px";
+      this.elems["bullet"].style.left = pos.left + "px";
    };
    Game.prototype.destroyBullet = function(){
-      $(".bullet").removeClass("bulletVisible");
+      $(this.elems["bullet"]).removeClass("bulletVisible");
    };
 
    socket.on('gameStart', function(){
