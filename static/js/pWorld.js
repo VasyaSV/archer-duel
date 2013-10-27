@@ -8,7 +8,7 @@
    var bullet = undefined;
 
    var PIXELS_AS_METER = 30;
-    
+   var HEAD = 1 / 3; // размер головы относительно тела
 
    function createWorld() {
       return new Box2D.Dynamics.b2World(
@@ -102,16 +102,20 @@
    // обрабатываем столкновения
    ContactListener.prototype.PostSolve = function (contact, impulse) {
       var
-         dataA = contact.GetFixtureA().GetBody().GetUserData(),
-         dataB = contact.GetFixtureB().GetBody().GetUserData();
+         dataA = contact.GetFixtureA().GetBody().GetUserData(), // стрела
+         dataB = contact.GetFixtureB().GetBody().GetUserData(); // лучник
+
+       var hp = 1;
 
       if (bullet && dataA.name == "bullet"){
+         if (contact.GetBodyA().position.y > (contact.GetBodyB().height*(1-HEAD))
+             hp++;
          world.DestroyBody(bullet);
          bullet = undefined;
          cb({
             hit : /archer/.test(dataB.name),
             to : /.$/.exec(dataB.name)[0],
-            hp : 1
+            hp : hp
          })
       }
    };
