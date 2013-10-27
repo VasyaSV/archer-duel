@@ -170,7 +170,7 @@
 
        jumpDir : function (name, dir) {
            var vect = {};// = new Box2D.Common.Math.b2Vec2(vector.x, vector.y);
-           vect = new Box2D.Common.Math.b2Vec2(dir.x , dir.y);
+           vect = new Box2D.Common.Math.b2Vec2(dir.x, dir.y);
            archers[name].ApplyImpulse(vect, archers[name].GetCenter().GetWorldCenter());
        },
 
@@ -194,8 +194,12 @@
       },
 
       changeWind: function (dir) {
-         var wind = new Box2D.Common.Math.b2Vec2(dir, 10);
-         world.SetGravity(wind);
+         var wind = new Box2D.Common.Math.b2Vec2(dir, 0);
+         //world.SetGravity(wind);
+         // var vect = {};// = new Box2D.Common.Math.b2Vec2(vector.x, vector.y);
+         vect = new Box2D.Common.Math.b2Vec2(dir, 0);
+         archers[name].ApplyForce(vect, archers[name].GetCenter().GetWorldCenter());
+
       },
 
       getArcher: function(name){
