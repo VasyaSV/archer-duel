@@ -184,6 +184,12 @@
            archers[name].ApplyImpulse(vect, archers[name].GetCenter().GetWorldCenter());
        },
 
+       jumpDir : function (name, dir) {
+           var vect = {};// = new Box2D.Common.Math.b2Vec2(vector.x, vector.y);
+           vect = new Box2D.Common.Math.b2Vec2(dir.x , dir.y);
+           archers[name].ApplyImpulse(vect, archers[name].GetCenter().GetWorldCenter());
+       },
+
       bulletExists: function () {
          return bullet !== undefined;
       },
