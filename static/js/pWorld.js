@@ -42,6 +42,9 @@
       if (property.name == "bullet")
          body_def.isBullet = true;
 
+       body_def.SetSleepingAllowed(true);
+
+
       body = world.CreateBody(body_def);
       body.CreateFixture(body_fix_def);
 
@@ -68,7 +71,7 @@
    function createArcher(name, pos){
       archers[name] = createBody({
          name : name,
-         hp : 3,
+         hp : 2,
          type : "dynamic",
          x : pos.x,
          y : pos.y,
@@ -111,7 +114,7 @@
       console.log("asdasdasd");
       cbData.name = body.GetUserData().name;
 
-      if ((cbData.name == "archer1" || cbData.name == "archer2") && contact.GetBodyA().name == "bullet"){
+      if ((cbData.name == "archer0" || cbData.name == "archer1") && contact.GetBodyA().name == "bullet"){
          archers[cbData.name].userData.hp--;
          if (archers[cbData.name].userData.hp != 0)
             if (contact.GetBodyA().position.y > (contact.GetBodyB().height*(1-HEAD)))
@@ -138,18 +141,20 @@
          //earthBody
          createGround();
 
-
-
          ///groundBodyDef; groundBodyDef.position.Set(0.0f, -10.0f);
          //groundBodyDef; groundBodyDef.position.Set(0.0f, -10.0f);
-         createArcher("archer1", {x : 5, y : 5});
-         createArcher("archer2", {x : 95, y : 5});
+         createArcher("archer0", {x : 5, y : 5});
+         createArcher("archer1", {x : 95, y : 5});
       },
 
+       isSleep : function (name){
+           return archers[name].body.IsSleeping();
+       },
+
       getHit: function (name) {
-         if (name == "archer1")
+         if (name == "archer0")
             return archer1_body.userData.hp;
-         if (name == "archer2")
+         if (name == "archer1")
             return archer2_body.userData.hp;
       },
 

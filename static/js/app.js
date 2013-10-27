@@ -1,13 +1,17 @@
 (function(){
    var
-      socket = io.connect('http://localhost'),
+      socket = io.connect('/'),
+      connectData = {
+         room : /[^\/]*$/.exec(window.location.pathname)[0],
+         id : window.currentUserId
+      },
       gameInst;
 
 
 
    var Game = function(playerId){
       this.playerId    = playerId;
-      this.iAmActive   = false;
+      this.iAmActive   = this.playerId === 0;
       this.turnTimeout = null;
 
       this.init();
@@ -18,7 +22,9 @@
 
       pWorld.initWorld({
          onHit : function(data){
-            if(data.name){
+            self.destroyBullet();
+
+            if(data.hit){
                socket.emit("hit", data);
             }
             self.nextTurn();
@@ -27,8 +33,8 @@
 
       setInterval(function(){
          pWorld.step();
+         self.drawArcher("archer0", pWorld.getArcher("archer0"));
          self.drawArcher("archer1", pWorld.getArcher("archer1"));
-         self.drawArcher("archer2", pWorld.getArcher("archer2"));
          if (pWorld.bulletExists()){
             self.drawBullet(pWorld.getBullet());
          }
@@ -55,7 +61,7 @@
       }
    };
 
-   Game.prototype.fire = function(){
+   Game.prototype.fire = function(pId, vec){
       this.iAmActive = false;
       socket.emit("fire", {name: pId, vec: vec});
    };
@@ -76,23 +82,40 @@
       $(".bullet").removeClass("bulletVisible");
    };
 
-   gameInst =  new Game("archer1");
-
-   socket.on('gameStart', function(pId){
-      gameInst =  new Game(pId);
+   socket.on('gameStart', function(){
+      gameInst =  new Game(window.currentPlayerPosition);
    });
 
    socket.on('state', function (data) {
       gameInst.onState(data);
    });
 
+   socket.on('nextTurn', function (data) {
+      gameInst.iAmActive = data.id == gameInst.playerId;
+   });
+
    socket.on('fire', function(data){
-      pWorld.createBullet(data.pId, data.vec);
+      pWorld.createBullet("archer" + data.name, data.vec);
    });
 
    socket.on('gameEnd', function(){
       gameInst.end();
    });
 
-   socket.emit("ready");
+   socket.emit("ready", connectData);
+
+   $(window).unload(function() {
+      socket.emit("leave", connectData);
+   });
+
+   $("body").keyup(function(e){
+      if(e.which == 32 && gameInst.playerId > -1 && !pWorld.bulletExists() && gameInst.iAmActive){
+         if (gameInst.playerId == 0){
+            gameInst.fire(gameInst.playerId, {x : 25,y : -15});
+         }
+         else{
+            gameInst.fire(gameInst.playerId, {x : -25,y : -15});
+         }
+      }
+   })
 }());

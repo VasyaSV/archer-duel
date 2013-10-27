@@ -1,8 +1,17 @@
-<% include head %>
-<div id="centralCont">
-   <div id="containerForArchers">
-      <div id="LeftPl" class="archer1"></div>
-      <div id="RightPl" class="archer2"></div>
+<% include inc/head %>
+<body class="gameBody">
+<script>
+    window.currentUserId = '<%= userid %>';
+    window.currentPlayerPosition = parseInt('<%= position %>');
+</script>
+<div class="centralContWrapper">
+   <div id="centralCont">
+
+      <div class="skyHelper"></div>
+      <div class="ground"></div>
+      <div class="bullet"></div>
+      <div id="LeftPl" class="archer0"></div>
+      <div id="RightPl" class="archer1"></div>
    </div>
 </div>
 
@@ -10,7 +19,7 @@
    <div class="block_invisible_child">
       <div align="center" class="block_player_left">
          <div class="block_name">
-            Имя персонажа
+            <%= player1.displayName %>
          </div>
          <div class="block_hearts_invisible">
             <div class="block_hearts">
@@ -26,7 +35,7 @@
       </div>
       <div align="center" class="block_player_right">
          <div class="block_name">
-            Имя персонажа
+            <%= player2.displayName %>
          </div>
          <div class="block_hearts_invisible">
             <div class="block_hearts">
@@ -39,6 +48,10 @@
       </div>
    </div>
 </div>
-<% include foot %>
+<div class="leftScrollBox" onmouseover="MousOverLeft(event)" onmouseout="ScrollBoxMouseOut()"></div>
+<div class="rightScrollBox" onmouseover="MousOverRight(event)" onmouseout="ScrollBoxMouseOut()"></div>
+<audio src="/mp3/jp.mp3" autoplay loop></audio>
+</body>
+<% include inc/foot %>
 <script src="/js/pWorld.js" type="application/javascript"></script>
 <script src="/js/app.js" type="application/javascript"></script>

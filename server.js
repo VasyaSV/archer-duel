@@ -85,9 +85,24 @@ app.get('/game/new', function(req, res){
         // либо создаем комнату либо берем первую свободную и добавляем туда игрока
         // затем делаем редирект на эту комнату
         if(availRooms.length > 0) {
+            console.log(req.session.user.displayName + " entering an eisting room");
             room = availRooms[0];
         } else {
+            console.log(req.session.user.displayName + " creating a new room");
             rooms.push(room = new Room(io));
+            // будем слушать на комнате событие winner
+            room.on('winner', function(userid){
+                User.find({ identity: userid }, function(err, users){
+                    if (err) {
+                        console.log("Error getting user with identity " + userid);
+                        console.error(err);
+                    } else {
+                        users[0].games = (users[0].games || 0) + 1;
+                        users[0].score = (users[0].score || 0) + 1;
+                        users[0].save();
+                    }
+                })
+            });
         }
         room.addPlayer(player);
         res.redirect('/game/' + room.getId());
@@ -97,12 +112,24 @@ app.get('/game/new', function(req, res){
 
 app.get('/game/:room', function(req, res){
 
-    var room = roomById(req.params.room);
+    // Все спектакторы придут сюда, но они не добавлены как игроки.
+    // При входе они отправят ready и будут прописаны в socket-комнату
+    // и будут получать все извещения через броадкасты
 
+    if(req.session.user) {
+        console.log("Rendering room " + req.params.room + " for " + req.session.user.identity);
+        var room = roomById(req.params.room);
+        var roomState = room.toJSON();
 
-
-
-    res.render('game');
+        res.render('game', {
+            userid: req.session.user.identity,
+            player1: roomState.player1,
+            player2: roomState.player2,
+            position: room.getUserPosition(req.session.user.identity)
+        });
+    } else {
+        res.redirect('/login');
+    }
 });
 
 app.post('/auth', function(req, res){
@@ -145,7 +172,8 @@ app.post('/auth', function(req, res){
                                 });
                             } else {
                                 req.session.user = {
-                                    displayName: dbResult[0].displayName
+                                    displayName: dbResult[0].displayName,
+                                    identity: dbResult[0].identity
                                 };
                                 res.redirect('/rooms');
                             }
@@ -166,20 +194,34 @@ app.post('/auth', function(req, res){
 
 io.sockets.on('connection', function (socket) {
 
-    socket.on('join', function(data){
-        roomById(data.room).addClient(socket, data);
+    socket.on('ready', function(data){
+        var room = roomById(data.room);
+        if(room) {
+            room.addClient(socket, data);
+        }
     });
 
     socket.on('leave', function(data){
-        roomById(data.room).removeClient(socket, data);
+        var room = roomById(data.room);
+        if(room) {
+            room.removeClient(socket, data);
+        }
     });
 
 });
 
+// сборка умерших комнат
 setInterval(function roomGC(){
-    rooms = rooms.filter(function(room){
-        return room.isAlive();
+    var filtered = rooms.reduce(function(memo, room){
+        memo[room.isAlive() ? 'alive' : 'dead'].push(room);
+        return memo;
+    }, { alive: [], dead: [] });
+
+    filtered.dead.forEach(function(deadRoom){
+        deadRoom.dispose();
     });
+
+    rooms = filtered.alive;
 }, 100);
 
 function roomById(id) {
@@ -188,4 +230,4 @@ function roomById(id) {
     })[0];
 }
 
-server.listen(process.env.PORT || 80);
+server.listen(process.env.PORT || 555);
